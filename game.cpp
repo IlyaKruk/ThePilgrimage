@@ -7,11 +7,22 @@
 #include <limits>
 #include <algorithm>
 #include <stdlib.h>
+#include "enemy.h"
 
 Pilgrimage::Pilgrimage() :
     actions_left_(GameConfig::GetInstance().GetInt("day_duration", 3)),
-    is_day_(true)
+    is_day_(true),
+    enemy_types_()
 {
+    std::string enemyTypes = GameConfig::GetInstance().GetString("enemy_types", "wolf,bandit");
+    size_t pos = 0;
+    while ((pos = enemyTypes.find(',')) != std::string::npos) {
+        enemy_types_.push_back(enemyTypes.substr(0, pos));
+        enemyTypes.erase(0, pos + 1);
+    }
+    if (!enemyTypes.empty()) {
+        enemy_types_.push_back(enemyTypes);
+    }
     std::srand(std::time(nullptr));
 }
 
@@ -145,7 +156,7 @@ void Pilgrimage::Explore() {
     player_.SpendStamina(20);
     actions_left_--;
 
-    int event = rand() % 5;
+    int event = rand() % 6;
     switch (event) {
     case 0:
         player_.AddGold(10 + rand() % 20);
@@ -164,6 +175,10 @@ void Pilgrimage::Explore() {
         std::cout << "\nНашли тихое красивое место. Выносливость +15.\n";
         break;
     case 4:
+        std::cout << "\nНа вас напали!\n";
+        CombatEncounter();
+        break;
+    case 5:
         std::cout << "\nДолгий путь не принес ничего особенного.\n";
         break;
     }
@@ -193,7 +208,7 @@ void Pilgrimage::Rest() {
 
 void Pilgrimage::DailyProgress() {
     system("cls");
-    int cost = GameConfig::GetInstance().GetInt("push_forward_cost", 30);
+    int cost = GameConfig::GetInstance().GetInt("daily_progress_cost", 30);
     if (player_.stamina() < cost) {
         std::cout << "Нужно " << cost << " выносливости!\n";
         return;
@@ -235,15 +250,10 @@ void Pilgrimage::DefendWagon() {
     actions_left_--;
 
     if (rand() % 10 < 7) {
-        int damage = (GameConfig::GetInstance().GetInt("base_monster_damage", 15) / 2) + (rand() % 10);
-        player_.DamageWagon(damage);
-        std::cout << "Отбили атаку! Повозка -" << damage << " прочности\n";
-
-        if (rand() % 3 == 0) {
-            int damage = 5 + (rand() % 10);
-            player_.TakeDamage(damage);
-            std::cout << "Получили ранение: -" << damage << " здоровья\n";
-        }
+        CombatEncounter();
+    }
+    else {
+        std::cout << "\nНикто не напал на вас этой ночью.\n";
     }
 }
 
@@ -272,6 +282,58 @@ void Pilgrimage::NightMarch() {
     }
 }
 
+Enemy Pilgrimage::GenerateRandomEnemy() const {
+    if (enemy_types_.empty()) return Enemy("wolf");
+    int index = rand() % enemy_types_.size();
+    return Enemy(enemy_types_[index]);
+}
+
+void Pilgrimage::CombatEncounter() {
+    Enemy enemy = GenerateRandomEnemy();
+    std::cout << "Вы встретили " << enemy.GetName() << "!\n";
+
+    while (enemy.IsAlive() && player_.IsAlive()) {
+        system("cls");
+        std::cout << enemy.GetName() << ": " << enemy.GetHealth() << "хп/"
+            << enemy.GetDamage() << " урона\n";
+        std::cout << "1. Атаковать\n2. Попытаться убежать\n";
+
+        int choice = GetPlayerChoice(1, 2);
+
+        if (choice == 1) {
+            int playerDamage = GameConfig::GetInstance().GetInt("player_base_damage", 15);
+            enemy.TakeDamage(playerDamage);
+            std::cout << "Вы нанесли " << playerDamage << " урона!\n";
+
+            if (enemy.IsAlive()) {
+                player_.TakeDamage(enemy.GetDamage());
+                std::cout << enemy.GetName() << " атакует в ответ! -"
+                    << enemy.GetDamage() << " здоровья\n";
+                std::cout << "Введите 0, чтобы продолжить!\n";
+                int newchoice = GetPlayerChoice(0, 0);
+            }
+        }
+        else {
+            if (rand() % 2 == 0) { 
+                system("cls");
+                std::cout << "Вам удалось сбежать!\n";
+                return;
+            }
+            std::cout << "Побег не удался! " << enemy.GetName() << " атакует!\n";
+            player_.TakeDamage(enemy.GetDamage());
+            std::cout << "Введите 0, чтобы продолжить!\n";
+            int newchoice = GetPlayerChoice(0, 0);
+        }
+    }
+
+    if (!enemy.IsAlive()) {
+        system("cls");
+        int reward = enemy.GetGoldReward();
+        player_.AddGold(reward);
+        std::cout << "Вы победили " << enemy.GetName() << " и получили "
+            << reward << " золота!\n";
+    }
+}
 
 void Pilgrimage::RandomTravelEvent() {
     system("cls");
@@ -290,9 +352,8 @@ void Pilgrimage::RandomTravelEvent() {
         std::cout << "Помогли путнику! +15 здоровья\n";
         break;
     case 3:
-        player_.TakeDamage(10);
-        player_.SpendGold(15);
-        std::cout << "Ограблены! -10 здоровья, -15 золота\n";
+        std::cout << "На вас напали!\n";
+        CombatEncounter();
         break;
     }
     std::cout << "---------------\n";

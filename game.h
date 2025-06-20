@@ -2,6 +2,9 @@
 #define PILGRIMAGE_GAME_H_
 
 #include "player.h"
+#include "enemy.h"
+#include <vector>
+#include <string>
 
 class Pilgrimage {
 public:
@@ -23,6 +26,10 @@ private:
 	void RandomTravelEvent();
 	void PrintGameOver();
 	int GetPlayerChoice(int min, int max);
+
+	std::vector<std::string> enemy_types_;
+	Enemy GenerateRandomEnemy() const;
+	void CombatEncounter();
 
 	Player player_;
 	int actions_left_;

@@ -1,13 +1,26 @@
 #ifndef ENEMY_H
-#define ENEMYG_H
+#define ENEMY_H
+
+#include <string>
+#include "config.h"
 
 class Enemy {
 public:
-	Enemy();
-	int enemy_health() const;
+    Enemy(const std::string& type);
+
+    std::string GetName() const;
+    int GetHealth() const;
+    int GetDamage() const;
+    int GetGoldReward() const;
+    void TakeDamage(int amount);
+    bool IsAlive() const;
 
 private:
-	int enemy_health_;
+    std::string name_;
+    int health_;
+    int max_health_;
+    int damage_;
+    int gold_reward_;
 };
 
 #endif
