@@ -130,6 +130,7 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
   </ItemGroup>
@@ -138,6 +139,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="item.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="game.cfg" />

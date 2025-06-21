@@ -1,6 +1,9 @@
 #ifndef PILGRIMAGE_PLAYER_H_
 #define PILGRIMAGE_PLAYER_H_
 
+#include "item.h"
+#include <vector>
+
 class Player {
 public:
 	Player();
@@ -30,6 +33,13 @@ public:
 	bool HasTime() const;
 	bool HasReachedTemple() const;
 
+	void AddItem(const Item& item);
+	void RemoveItem(int index);
+	void UseItem(int index);
+	void ShowInventory() const;
+	const std::vector<Item>& GetInventory() const;
+	bool HasItem(const std::string& name) const;
+
 private:
 	int health_;
 	int stamina_;
@@ -43,6 +53,8 @@ private:
 	const int MAX_DAYS;
 	const int WAGON_HEALTH_MAX;
 	const int DISTANCE_TO_TEMPLE;
+
+	std::vector<Item> inventory_;
 
 	void InitConfig();
 };

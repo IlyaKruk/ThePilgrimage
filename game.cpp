@@ -65,8 +65,9 @@ void Pilgrimage::HandleDay() {
             << GameConfig::GetInstance().GetInt("daily_progress", 80)
             << " km, -" << GameConfig::GetInstance().GetInt("daily_progress_cost", 30)
             << " stamina)\n";
+        std::cout << "5. Open inventory.\n";
 
-        int choice = GetPlayerChoice(1, 4);
+        int choice = GetPlayerChoice(1, 5);
 
         system("cls");
 
@@ -75,6 +76,7 @@ void Pilgrimage::HandleDay() {
         case 2: RepairWagon(); break;
         case 3: Rest(); break;
         case 4: DailyProgress(); break;
+        case 5: HandleInventory(); break;
         }
 
         if (!player_.IsAlive() || !player_.HasWagon() || player_.HasReachedTemple()) {
@@ -358,6 +360,23 @@ void Pilgrimage::RandomTravelEvent() {
         break;
     }
     std::cout << "---------------\n";
+}
+
+void Pilgrimage::HandleInventory() {
+    player_.ShowInventory();
+
+    if (!player_.GetInventory().empty()) {
+        std::cout << "\nChoose an item (0 for back): ";
+        int choice = GetPlayerChoice(0, player_.GetInventory().size());
+
+        if (choice > 0) {
+            player_.UseItem(choice - 1);
+        }
+    }
+    else {
+        std::cout << "Type 0 to continue...\n";
+        int choice = GetPlayerChoice(0, 0);
+    }
 }
 
 void Pilgrimage::PrintGameOver() {
