@@ -25,7 +25,6 @@ private:
 	void NightMarch();
 	void RandomTravelEvent();
 	void PrintGameOver();
-	void HandleInventory();
 	int GetPlayerChoice(int min, int max);
 
 	std::vector<std::string> enemy_types_;

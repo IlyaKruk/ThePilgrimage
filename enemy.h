@@ -2,7 +2,6 @@
 #define ENEMY_H
 
 #include <string>
-#include "config.h"
 
 class Enemy {
 public:

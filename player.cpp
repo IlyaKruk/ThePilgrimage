@@ -76,58 +76,6 @@ bool Player::HasTime() const { return day_ <= MAX_DAYS; }
 
 bool Player::HasReachedTemple() const { return distance_covered_ >= DISTANCE_TO_TEMPLE; }
 
-void Player::AddItem(const Item& item) {
-    inventory_.push_back(item);
-}
-
-void Player::RemoveItem(int index) {
-    if (index >= 0 && index < inventory_.size()) {
-        inventory_.erase(inventory_.begin() + index);
-    }
-}
-
-void Player::UseItem(int index) {
-    if (index < 0 || index >= inventory_.size()) return;
-
-    Item& item = inventory_[index];
-    switch (item.GetType()) {
-    case Item::Type::CONSUMABLE:
-        Heal(item.GetValue());
-        std::cout << "Used: " << item.GetName()
-            << ". HP +" << item.GetValue() << ".\n";
-        RemoveItem(index);
-        break;
-    case Item::Type::WEAPON:
-        std::cout << "Equipped: " << item.GetName() << ".\n";
-        break;
-    default:
-        std::cout << "You can't use this item.\n";
-    }
-}
-
-void Player::ShowInventory() const {
-    if (inventory_.empty()) {
-        std::cout << "Inventory is empty.\n";
-        return;
-    }
-
-    std::cout << "===== INVENTORY =====\n";
-    for (size_t i = 0; i < inventory_.size(); ++i) {
-        const auto& item = inventory_[i];
-        std::cout << i + 1 << ". " << item.GetName()
-            << " (" << item.GetDescription() << ")\n";
-    }
-}
-
-const std::vector<Item>& Player::GetInventory() const {
-    return inventory_;
-}
-
-bool Player::HasItem(const std::string& name) const {
-    return std::any_of(inventory_.begin(), inventory_.end(),
-        [&name](const Item& item) { return item.GetName() == name; });
-}
-
 void Player::InitConfig()
 {
 }
