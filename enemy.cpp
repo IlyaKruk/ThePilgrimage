@@ -32,12 +32,12 @@ void Enemy::TakeDamage(int amount) {
         health_ = 0;
     }
 
-    std::cout << name_ << " получает " << amount << " урона! ";
+    std::cout << name_ << " takes " << amount << " damage! ";
     if (health_ > 0) {
-        std::cout << "Осталось " << health_ << "/" << max_health_ << " здоровья.\n";
+        std::cout << "Remaining: " << health_ << "/" << max_health_ << " HP.\n";
     }
     else {
-        std::cout << name_ << " повержен!\n";
+        std::cout << name_ << " was defeated!\n";
     }
 }
 
