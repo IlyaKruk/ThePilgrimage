@@ -3,8 +3,10 @@
 
 #include "player.h"
 #include "enemy.h"
+#include "item.h"
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 class Pilgrimage {
 public:
@@ -24,11 +26,17 @@ private:
 	void DefendWagon();
 	void NightMarch();
 	void RandomTravelEvent();
+	void HandleInventory();
+	void AddItemToPlayer(const std::string& itemId);
 	void PrintGameOver();
 	int GetPlayerChoice(int min, int max);
+	Item GetItem(const std::string& itemId) const;
 
+	std::unordered_map<std::string, Item> game_items_;
 	std::vector<std::string> enemy_types_;
+	std::vector<std::string> item_types_;
 	Enemy GenerateRandomEnemy() const;
+    Item GenerateRandomItem() const;
 	void CombatEncounter();
 
 	Player player_;

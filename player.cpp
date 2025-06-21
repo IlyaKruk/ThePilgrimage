@@ -9,6 +9,7 @@ Player::Player() :
     MAX_DAYS(GameConfig::GetInstance().GetInt("max_days", 14)),
     WAGON_HEALTH_MAX(GameConfig::GetInstance().GetInt("wagon_health_max", 100)),
     DISTANCE_TO_TEMPLE(GameConfig::GetInstance().GetInt("distance_to_temple", 1000)),
+    damage_boost_(GameConfig::GetInstance().GetInt("damage_boost", 0)),
     health_(GameConfig::GetInstance().GetInt("max_health", 100)),
     stamina_(GameConfig::GetInstance().GetInt("max_stamina", 100)),
     gold_(0),
@@ -19,6 +20,7 @@ Player::Player() :
 
 int Player::health() const { return health_; }
 int Player::stamina() const { return stamina_; }
+int Player::damage_boost() const { return damage_boost_; }
 int Player::gold() const { return gold_; }
 int Player::day() const { return day_; }
 int Player::wagon_health() const { return wagon_health_; }
@@ -75,6 +77,14 @@ bool Player::HasWagon() const { return wagon_health_ > 0; }
 bool Player::HasTime() const { return day_ <= MAX_DAYS; }
 
 bool Player::HasReachedTemple() const { return distance_covered_ >= DISTANCE_TO_TEMPLE; }
+
+void Player::AddItem(const Item& item) {
+    inventory_.push_back(item);
+}
+
+const std::vector<Item>& Player::GetInventory() const {
+    return inventory_;
+}
 
 void Player::InitConfig()
 {

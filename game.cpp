@@ -12,17 +12,29 @@
 Pilgrimage::Pilgrimage() :
     actions_left_(GameConfig::GetInstance().GetInt("day_duration", 3)),
     is_day_(true),
-    enemy_types_()
+    enemy_types_(),
+    item_types_()
 {
     std::string enemyTypes = GameConfig::GetInstance().GetString("enemy_types", "wolf,bandit");
-    size_t pos = 0;
-    while ((pos = enemyTypes.find(',')) != std::string::npos) {
-        enemy_types_.push_back(enemyTypes.substr(0, pos));
-        enemyTypes.erase(0, pos + 1);
+    size_t pos_enemy = 0;
+    while ((pos_enemy = enemyTypes.find(',')) != std::string::npos) {
+        enemy_types_.push_back(enemyTypes.substr(0, pos_enemy));
+        enemyTypes.erase(0, pos_enemy + 1);
     }
     if (!enemyTypes.empty()) {
         enemy_types_.push_back(enemyTypes);
     }
+
+    std::string itemTypes = GameConfig::GetInstance().GetString("item_types", "healthpotion,ironsword");
+    size_t pos_item = 0;
+    while ((pos_item = itemTypes.find(',')) != std::string::npos) {
+        item_types_.push_back(itemTypes.substr(0, pos_item));
+        itemTypes.erase(0, pos_item + 1);
+    }
+    if (!itemTypes.empty()) {
+        item_types_.push_back(itemTypes);
+    }
+
     std::srand(std::time(nullptr));
 }
 
@@ -65,8 +77,9 @@ void Pilgrimage::HandleDay() {
             << GameConfig::GetInstance().GetInt("daily_progress", 80)
             << " km, -" << GameConfig::GetInstance().GetInt("daily_progress_cost", 30)
             << " stamina)\n";
+        std::cout << "5. Check inventory.\n";
 
-        int choice = GetPlayerChoice(1, 4);
+        int choice = GetPlayerChoice(1, 5);
 
         system("cls");
 
@@ -75,6 +88,7 @@ void Pilgrimage::HandleDay() {
         case 2: RepairWagon(); break;
         case 3: Rest(); break;
         case 4: DailyProgress(); break;
+        case 5: HandleInventory(); break;
         }
 
         if (!player_.IsAlive() || !player_.HasWagon() || player_.HasReachedTemple()) {
@@ -156,14 +170,16 @@ void Pilgrimage::Explore() {
     actions_left_--;
 
     int event = rand() % 6;
+    Item new_item = GenerateRandomItem();
+
     switch (event) {
     case 0:
         player_.AddGold(10 + rand() % 20);
         std::cout << "\nYou found traveler donations! Gold +" << player_.gold() << ".\n";
         break;
     case 1:
-        player_.Heal(15);
-        std::cout << "\nFound medicinal herbs. Health +15.\n";
+        std::cout << "\nFound " << new_item.GetName() << ". Added to your inventory!\n";
+        AddItemToPlayer(new_item.GetName());
         break;
     case 2:
         player_.DamageWagon(5);
@@ -358,6 +374,48 @@ void Pilgrimage::RandomTravelEvent() {
         break;
     }
     std::cout << "---------------\n";
+}
+
+void Pilgrimage::HandleInventory() {
+    const auto& inventory = player_.GetInventory();
+
+    if (inventory.empty()) {
+        std::cout << "Inventory is empty.\n";
+        return;
+    }
+
+    std::cout << "===== INVENTORY =====\n";
+    for (size_t i = 0; i < inventory.size(); ++i) {
+        const Item& item = inventory[i];
+        std::cout << i + 1 << ". " << item.GetName()
+            << " - " << item.GetDescription() << "\n";
+    }
+}
+
+
+Item Pilgrimage::GenerateRandomItem() const {
+    if (item_types_.empty()) return Item("health_potion");
+    int index = rand() % item_types_.size();
+    return Item(item_types_[index]);
+}
+
+Item Pilgrimage::GetItem(const std::string& itemId) const {
+    auto it = game_items_.find(itemId);
+    if (it != game_items_.end()) {
+        return it->second;
+    }
+    throw std::runtime_error("Item not found: " + itemId);
+}
+
+void Pilgrimage::AddItemToPlayer(const std::string& itemId) {
+    try {
+        Item item = GenerateRandomItem();
+        player_.AddItem(item);
+        std::cout << "Item added: " << item.GetName() << "\n";
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << "\n";
+    }
 }
 
 void Pilgrimage::PrintGameOver() {

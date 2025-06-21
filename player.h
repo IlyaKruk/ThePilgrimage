@@ -2,6 +2,7 @@
 #define PILGRIMAGE_PLAYER_H_
 
 #include <vector>
+#include "item.h"
 
 class Player {
 public:
@@ -9,6 +10,7 @@ public:
 
 	int health() const;
 	int stamina() const;
+	int damage_boost() const;
 	int gold() const;
 	int day() const;
 	int wagon_health() const;
@@ -32,9 +34,13 @@ public:
 	bool HasTime() const;
 	bool HasReachedTemple() const;
 
+	void AddItem(const Item& item);
+	const std::vector<Item>& GetInventory() const;
+
 private:
 	int health_;
 	int stamina_;
+	int damage_boost_;
 	int gold_;
 	int day_;
 	int wagon_health_;
@@ -45,6 +51,9 @@ private:
 	const int MAX_DAYS;
 	const int WAGON_HEALTH_MAX;
 	const int DISTANCE_TO_TEMPLE;
+
+	std::vector<Item> inventory_;
+
 
 	void InitConfig();
 };
