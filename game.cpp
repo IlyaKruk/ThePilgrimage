@@ -171,6 +171,7 @@ void Pilgrimage::Explore() {
 
     int event = rand() % 6;
     Item new_item = GenerateRandomItem();
+    std::string item_name = new_item.GetName();
 
     switch (event) {
     case 0:
@@ -178,8 +179,8 @@ void Pilgrimage::Explore() {
         std::cout << "\nYou found traveler donations! Gold +" << player_.gold() << ".\n";
         break;
     case 1:
-        std::cout << "\nFound " << new_item.GetName() << ". Added to your inventory!\n";
-        AddItemToPlayer(new_item.GetName());
+        std::cout << "\nFound " << item_name << ". Added to your inventory!\n";
+        AddItemToPlayer(item_name);
         break;
     case 2:
         player_.DamageWagon(5);
@@ -400,16 +401,19 @@ Item Pilgrimage::GenerateRandomItem() const {
 }
 
 Item Pilgrimage::GetItem(const std::string& itemId) const {
-    auto it = game_items_.find(itemId);
-    if (it != game_items_.end()) {
-        return it->second;
+    int index = 0;
+    for (size_t i = 0; i < item_types_.size(); ++i) {
+        if (item_types_[i] == itemId) {
+            index = i;
+            break;
+        }
     }
-    throw std::runtime_error("Item not found: " + itemId);
+    return Item(item_types_[index]);
 }
 
 void Pilgrimage::AddItemToPlayer(const std::string& itemId) {
     try {
-        Item item = GenerateRandomItem();
+        Item item = GetItem(itemId);
         player_.AddItem(item);
         std::cout << "Item added: " << item.GetName() << "\n";
     }
